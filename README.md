@@ -102,7 +102,6 @@ guntar list archive.tar
 ### Global Flags
 
 - `-h`, `--help`: Display help information for Guntar.
-- `-t`, `--toggle`: Help message for toggle.
 
 ## Examples
 
