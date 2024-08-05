@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/franciscolkdo/guntar/tar"
 )
 
 const marginBottom = 5
@@ -160,48 +161,32 @@ func (m ListerModel) back() (ListerModel, tea.Cmd) {
 }
 
 // setSelectionNode run top to bot to select or not all children from current node
-func setSelectionNode(f *listerNode, sel SelectedState) {
-	f.Spec.selectionStatus = sel
-	// if node is a dir, loop into children
-	if f.IsDir() {
-		for _, file := range f.GetChildren() {
-			setSelectionNode(file, sel)
-		}
-	}
+func setSelectionNode(node *listerNode, sel SelectedState) {
+	node.Spec.selectionStatus = sel
+	node.ForAllChildren(func(n *listerNode) error {
+		n.Spec.selectionStatus = sel
+		return nil
+	})
 }
 
 // setSelectionParentNode run bot to top to set all parents from current node as partially selected
-func setSelectionParentNode(n *listerNode) {
-	if n.IsRoot() {
+func setSelectionParentNode(node *listerNode) {
+	if node.IsRoot() {
 		return
 	}
 
-	p := n.GetParent()
+	p := node.GetParent()
 	p.Spec.selectionStatus = PartialSelected
 	setSelectionParentNode(p)
 }
 
-func (m *ListerModel) extract(n *listerNode) {
-	for _, f := range n.GetChildren() {
-		if f.Spec.selectionStatus == NotSelected {
-			continue
-		}
-		if !f.IsDir() && f.Mode().IsRegular() {
-			dirPath := filepath.Join(m.exportPath, f.GetParent().GetPath())
-			if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-				err := os.MkdirAll(dirPath, 0777) //TODO change me to use permissions from archive?
-				if err != nil {
-					tea.Printf("%s", err)
-				}
-			}
-			if err := os.WriteFile(filepath.Join(dirPath, f.Name()), f.GetData(), f.Mode().Perm()); err != nil {
-				tea.Printf("%s", err)
-			}
-		}
-		if f.IsDir() {
-			m.extract(f)
-		}
+func (m *ListerModel) extract(node *listerNode) tea.Cmd {
+	if err := tar.Extract(node, m.exportPath, func(n *listerNode) bool {
+		return n.Spec.selectionStatus == NotSelected
+	}); err != nil {
+		return func() tea.Msg { return errMsg(err) }
 	}
+	return nil
 }
 
 func (m *ListerModel) SetSize(msg tea.WindowSizeMsg) {
@@ -276,7 +261,7 @@ func (m ListerModel) Update(msg tea.Msg) (ListerModel, tea.Cmd) {
 			setSelectionParentNode(sf)
 
 		case key.Matches(msg, m.KeyMap.Extract):
-			m.extract(m.currentNode.GetRoot())
+			return m, m.extract(m.currentNode.GetRoot())
 		}
 	case tea.MouseMsg:
 		if msg.Action == tea.MouseActionPress {

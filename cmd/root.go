@@ -1,10 +1,26 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
+
+var output string
+
+func parseExtractPath() error {
+	if strings.HasPrefix(output, "~/") {
+		dirname, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("failed to get user home dir: %s", err)
+		}
+		output = filepath.Join(dirname, output[2:])
+	}
+	return nil
+}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{

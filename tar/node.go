@@ -2,14 +2,18 @@ package tar
 
 import (
 	"archive/tar"
+	"fmt"
 	"io/fs"
 	"path"
 	"path/filepath"
 	"time"
 )
 
+type SimpleNode = Node[struct{}]
+
 type Node[T any] struct {
 	fs.FileInfo
+	header   *tar.Header
 	path     string     // path is the unique id of the node
 	parent   *Node[T]   // parent is the direct parent of actual node, nil if node is root
 	children []*Node[T] // children are all childs under this node
@@ -40,6 +44,19 @@ func (n *Node[T]) GetParent() *Node[T] {
 	return n.parent
 }
 
+// ForAllChildren run cb in all nested children
+func (n *Node[T]) ForAllChildren(cb func(*Node[T]) error) error {
+	for _, node := range n.GetChildren() {
+		if err := cb(node); err != nil {
+			return err
+		}
+		if err := node.ForAllChildren(cb); err != nil {
+			return fmt.Errorf("Error on loop into children for %s: %s", n.GetPath(), err)
+		}
+	}
+	return nil
+} // Node is root
+
 // addChild set this node as parent to the added node and append it to children
 func (n *Node[T]) addChild(node *Node[T]) {
 	node.parent = n
@@ -52,6 +69,7 @@ func (n *Node[T]) isEqual(node *Node[T]) bool {
 
 func newNode[T any](header *tar.Header) *Node[T] {
 	return &Node[T]{
+		header:   header,
 		FileInfo: header.FileInfo(),
 		path:     filepath.Clean(header.Name),
 		data:     make([]byte, header.Size),
