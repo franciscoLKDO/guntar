@@ -13,7 +13,7 @@ var introCmd = &cobra.Command{
 	Use:   "intro",
 	Short: "Intro animation",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		_, err := tea.NewProgram(terminal.NewIntroModel(), tea.WithMouseCellMotion()).Run()
+		_, err := tea.NewProgram(terminal.NewIntroModel()).Run()
 		if err != nil {
 			return fmt.Errorf("failed on quit program: %s", err)
 		}
