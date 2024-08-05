@@ -94,7 +94,7 @@ func List(r io.Reader) ([]string, error) {
 }
 
 // Extract all nodes to the output file.
-// isSkipped callback can be used to add logic on nodes extraction
+// isSkipped callback can be used to add logic (skip current node if true) on nodes extraction
 func Extract[T any](node *Node[T], output string, isSkipped func(*Node[T]) bool) error {
 	if len(output) == 0 {
 		output = DefaultExtractFolder

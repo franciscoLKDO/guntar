@@ -30,7 +30,7 @@ func TestNewTerminal(t *testing.T) {
 	}
 	t.Run("Create new model", func(t *testing.T) {
 		var err error
-		term, err = New(buf)
+		term, err = New(buf, "")
 		require.Nil(t, err)
 		assert.Equal(t, directoryLister, term.CurrentView)
 	})
@@ -102,7 +102,7 @@ func TestNewTerminal(t *testing.T) {
 
 func TestErrorTerminal(t *testing.T) {
 	t.Run("Return error on bad tar scanning", func(t *testing.T) {
-		term, err := New(strings.NewReader("hello, this is not an archive reader"))
+		term, err := New(strings.NewReader("hello, this is not an archive reader"), "")
 		assert.ErrorContains(t, err, "error on scanning tar file")
 		assert.Equal(t, TerminalModel{}, term)
 	})

@@ -24,7 +24,7 @@ func TestNewLister(t *testing.T) {
 	buf := test.CreateArchive(t, files)
 	root, err := tar.Scan(buf, OnNewNode)
 	require.Nil(t, err)
-	l := NewLister(root)
+	l := NewLister(root, "")
 	t.Run("New Lister get default", func(t *testing.T) {
 		assert.Equal(t, fileReader, l.enterFileView)
 		assert.True(t, l.currentNode.IsDir())
@@ -137,7 +137,7 @@ func TestListerSelection(t *testing.T) {
 	buf := test.CreateArchive(t, files)
 	root, err := tar.Scan(buf, OnNewNode)
 	require.Nil(t, err)
-	l := NewLister(root)
+	l := NewLister(root, "")
 	l.SetSize(tea.WindowSizeMsg{Height: 10})
 	t.Run("Select './test/' directory node", func(t *testing.T) {
 		var cmd tea.Cmd

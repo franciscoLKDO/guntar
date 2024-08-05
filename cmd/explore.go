@@ -12,18 +12,22 @@ import (
 // exploreCmd represents the explore command
 var exploreCmd = &cobra.Command{
 	Use:   "explore <archive file>",
-	Args:  cobra.ExactArgs(1),
 	Short: "Explore tar archive in memory",
 	Long: `Explore your tar archive in memory directly in your cli:
 
 You can browse, look into files and extract selected files/folders.
 `,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := parseExtractPath(); err != nil {
+			return err
+		}
+
 		file, err := os.Open(args[0])
 		if err != nil {
 			return fmt.Errorf("failed to open given file: %s", err)
 		}
-		terminal, err := terminal.New(file)
+		terminal, err := terminal.New(file, output)
 
 		if err != nil {
 			return fmt.Errorf("failed to create terminal: %s", err)
@@ -38,5 +42,6 @@ You can browse, look into files and extract selected files/folders.
 }
 
 func init() {
+	exploreCmd.Flags().StringVarP(&output, "output", "o", "", "Output directory to extract archive")
 	rootCmd.AddCommand(exploreCmd)
 }

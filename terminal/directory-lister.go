@@ -2,8 +2,6 @@ package terminal
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -36,14 +34,9 @@ type ListerModel struct {
 }
 
 // NewLister return a Node lister with default styling and key bindings.
-func NewLister(n *listerNode) ListerModel {
-	pwd, err := os.Getwd()
-	if err != nil {
-		tea.Printf("%s", err)
-	}
-
+func NewLister(n *listerNode, exportPath string) ListerModel {
 	return ListerModel{
-		exportPath:      filepath.Join(pwd, "extracted"),
+		exportPath:      exportPath,
 		selected:        0,
 		currentNode:     n,
 		ShowPermissions: true,

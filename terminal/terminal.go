@@ -19,16 +19,18 @@ type TerminalModel struct {
 	err             error
 }
 
-func New(tarFile io.Reader) (TerminalModel, error) {
+func New(tarFile io.Reader, exportPath string) (TerminalModel, error) {
 	tb, _ := NewTextBox()
-
+	if len(exportPath) == 0 {
+		exportPath = tar.DefaultExtractFolder
+	}
 	root, err := tar.Scan(tarFile, OnNewNode)
 	if err != nil {
 		return TerminalModel{}, fmt.Errorf("error on scanning tar file: %s", err)
 	}
 	return TerminalModel{
 		textBox:         tb,
-		directoryLister: NewLister(root),
+		directoryLister: NewLister(root, exportPath),
 		CurrentView:     directoryLister,
 		KeyMap:          DefaultKeyMap(),
 		quitting:        false,

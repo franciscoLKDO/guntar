@@ -9,11 +9,14 @@ test-setup:
 	mkdir -p ${TEST_RESULTS_DIR}
 	mkdir -p ${TEST_RESULTS_COVERAGE_REPORT_DIR}
 
-test: test-setup ## Run all tests
+test: test-setup
 	@go test -timeout ${TEST_TIMEOUT} -v -count ${TEST_REPEAT_COUNT} ./... -coverpkg=./... -coverprofile=${TEST_RESULTS_COVERAGE_REPORT_COV}
 	@go tool cover -html=${TEST_RESULTS_COVERAGE_REPORT_COV} -o ${TEST_RESULTS_COVERAGE_REPORT_HTML}
 	@printf "Coverage report available here: ${TEST_RESULTS_COVERAGE_REPORT_HTML}\n"
 
-install: ## Install dependencies of module
+install:
 	go mod tidy
 	go mod download && go mod verify
+
+install-binary: install
+	go install
