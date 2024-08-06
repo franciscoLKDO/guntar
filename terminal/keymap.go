@@ -28,8 +28,8 @@ func DefaultKeyMap() KeyMap {
 		PageDown: key.NewBinding(key.WithKeys("J", "pgdown"), key.WithHelp("pgdown", "page down")),
 		Back:     key.NewBinding(key.WithKeys("backspace", "left", "esc"), key.WithHelp("h", "back")),
 		Open:     key.NewBinding(key.WithKeys("l", "right", "enter"), key.WithHelp("l", "open")),
-		Select:   key.NewBinding(key.WithKeys("ctrl+a"), key.WithHelp("ctrl+a", "select")),
-		Extract:  key.NewBinding(key.WithKeys("ctrl+s"), key.WithHelp("ctrl+s", "extract")),
+		Select:   key.NewBinding(key.WithKeys("a"), key.WithHelp("a", "select")),
+		Extract:  key.NewBinding(key.WithKeys("e"), key.WithHelp("e", "extract")),
 		Quit:     key.NewBinding(key.WithKeys("ctrl+c"), key.WithHelp("ctrl+c", "quit")),
 	}
 }

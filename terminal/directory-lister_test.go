@@ -141,7 +141,7 @@ func TestListerSelection(t *testing.T) {
 	l.SetSize(tea.WindowSizeMsg{Height: 10})
 	t.Run("Select './test/' directory node", func(t *testing.T) {
 		var cmd tea.Cmd
-		l, cmd = l.Update(tea.KeyMsg{Type: tea.KeyCtrlA}) // Type select button
+		l, cmd = l.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'a'}}) // Type select button
 		assert.Nil(t, cmd)
 		nd := l.currentNode.GetChildren()[l.selected]
 		assert.Equal(t, Selected, nd.Spec.selectionStatus)
@@ -156,7 +156,7 @@ func TestListerSelection(t *testing.T) {
 		assert.IsType(t, DirMsg{}, cmd())                 // New command with DirMsg is created
 		l, cmd = l.Update(cmd())                          // Update lister with provided command
 		assert.Nil(t, cmd)
-		l, cmd = l.Update(tea.KeyMsg{Type: tea.KeyCtrlA}) // Type select button (deselect on selected node)
+		l, cmd = l.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'a'}}) // Type select button (deselect on selected node)
 		assert.Nil(t, cmd)
 		nd := l.currentNode.GetChildren()[l.selected]
 		assert.Equal(t, "test/nested", nd.GetPath())
@@ -179,7 +179,7 @@ func TestListerSelection(t *testing.T) {
 		l.exportPath = tmpDir
 		// Go in /test
 
-		l, cmd = l.Update(tea.KeyMsg{Type: tea.KeyCtrlS}) // Type select button (deselect on selected node)
+		l, cmd = l.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'e'}}) // Type select button (deselect on selected node)
 		assert.Nil(t, cmd)
 		testNode := l.currentNode.GetChildren()[l.selected]
 		// test directory should be found

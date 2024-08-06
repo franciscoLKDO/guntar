@@ -1,6 +1,8 @@
 # Guntar
 
-Guntar is a CLI tool for working with tar archives. It allows you to read tar archives and browse, read, and extract files directly in memory.
+![Alt Text](./vhs/intro.gif)
+
+Guntar is a CLI tool for tar archive. It allows you to read tar archives and browse, read, and extract files directly in memory.
 
 ## Features
 
@@ -37,6 +39,9 @@ guntar [command]
 ### Available Commands
 
 #### `explore`
+
+![Alt Text](./vhs/explore.gif)
+
 Explore your tar archive in memory directly in your CLI. You can browse, look into files, and extract selected files/folders.
 This interactive cli is based on [bubbletea](https://github.com/charmbracelet/bubbletea) project
 
@@ -91,6 +96,8 @@ guntar help [command]
 ```
 
 #### `list`
+![Alt Text](./vhs/list.gif)
+
 List all files in the current archive.
 
 Usage:

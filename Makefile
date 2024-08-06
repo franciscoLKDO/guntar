@@ -6,6 +6,10 @@ TEST_TIMEOUT?=100s
 TEST_REPEAT_COUNT?=3
 APP_VERSION?=$(shell go run . version)-dev
 
+GENERATE_ID=$(shell docker create guntar)
+SET_DOCKER_ID = $(eval DOCKER_ID=$(GENERATE_ID))
+
+
 test-setup:
 	mkdir -p ${TEST_RESULTS_DIR}
 	mkdir -p ${TEST_RESULTS_COVERAGE_REPORT_DIR}
@@ -21,6 +25,21 @@ install:
 
 build:
 	docker build . -t guntar --build-arg APP_VERSION=${APP_VERSION}
+
+vhs-tape: build vhs/*.tape
+	$(SET_DOCKER_ID)
+	docker cp ${DOCKER_ID}:/guntar ./vhs && docker rm ${DOCKER_ID}
+	for file in $^ ; do \
+		docker run --rm \
+			-u `id -u`:`id -u` \
+			-v `pwd`/test/mytarfolder.tar:/mytarfolder.tar \
+			-v `pwd`/vhs:/vhs \
+			-e TARFILE=/mytarfolder.tar -e OUTDIR=./extracted \
+			ghcr.io/charmbracelet/vhs $${file##*/} ; \
+	done
+	rm ./vhs/guntar
+	rm -r ./vhs/extracted
+
 
 install-binary: install
 	go install
