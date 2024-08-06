@@ -3,7 +3,8 @@ TEST_RESULTS_COVERAGE_REPORT_DIR?=${TEST_RESULTS_DIR}/coverage
 TEST_RESULTS_COVERAGE_REPORT_COV?=${TEST_RESULTS_COVERAGE_REPORT_DIR}/coverage.cov
 TEST_RESULTS_COVERAGE_REPORT_HTML?=${TEST_RESULTS_COVERAGE_REPORT_DIR}/coverage.html
 TEST_TIMEOUT?=100s
-TEST_REPEAT_COUNT?=10
+TEST_REPEAT_COUNT?=3
+APP_VERSION?=$(shell go run . version)-dev
 
 test-setup:
 	mkdir -p ${TEST_RESULTS_DIR}
@@ -17,6 +18,9 @@ test: test-setup
 install:
 	go mod tidy
 	go mod download && go mod verify
+
+build:
+	docker build . -t guntar --build-arg APP_VERSION=${APP_VERSION}
 
 install-binary: install
 	go install
