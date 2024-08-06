@@ -13,10 +13,17 @@ Guntar is a CLI tool for working with tar archives. It allows you to read tar ar
 
 __Work in Progress__ (I will add a docker image, packages, etc...)
 
+### Install binary
 For now you can clone the repository and run
 
 ```
 make install-binary
+```
+
+### Build docker image
+
+```
+make build
 ```
 
 ## Usage
