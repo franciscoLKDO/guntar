@@ -5,9 +5,7 @@ TEST_RESULTS_COVERAGE_REPORT_HTML?=${TEST_RESULTS_COVERAGE_REPORT_DIR}/coverage.
 TEST_TIMEOUT?=100s
 TEST_REPEAT_COUNT?=3
 APP_VERSION?=$(shell go run . version)-dev
-
-GENERATE_ID=$(shell docker create guntar)
-SET_DOCKER_ID = $(eval DOCKER_ID=$(GENERATE_ID))
+APP_NAME:=guntar
 
 
 test-setup:
@@ -19,27 +17,44 @@ test: test-setup
 	@go tool cover -html=${TEST_RESULTS_COVERAGE_REPORT_COV} -o ${TEST_RESULTS_COVERAGE_REPORT_HTML}
 	@printf "Coverage report available here: ${TEST_RESULTS_COVERAGE_REPORT_HTML}\n"
 
-install:
+install-dependencies:
 	go mod tidy
 	go mod download && go mod verify
 
-build:
-	docker build . -t guntar --build-arg APP_VERSION=${APP_VERSION}
-
-vhs-tape: build vhs/*.tape
-	$(SET_DOCKER_ID)
-	docker cp ${DOCKER_ID}:/guntar ./vhs && docker rm ${DOCKER_ID}
-	for file in $^ ; do \
-		docker run --rm \
-			-u `id -u`:`id -u` \
-			-v `pwd`/test/mytarfolder.tar:/mytarfolder.tar \
-			-v `pwd`/vhs:/vhs \
-			-e TARFILE=/mytarfolder.tar -e OUTDIR=./extracted \
-			ghcr.io/charmbracelet/vhs $${file##*/} ; \
-	done
-	rm ./vhs/guntar
-	rm -r ./vhs/extracted
-
-
 install-binary: install
 	go install
+
+build-image:
+	docker build . -t ${APP_NAME} --build-arg APP_VERSION=${APP_VERSION}
+
+
+# Handle gif targets, 
+GIF_DIR:=vhs
+TARBALL:=/mytarfolder.tar
+OUTDIR:=./extracted
+INPUTS_TAPE = $(wildcard ${GIF_DIR}/*.tape)
+OUTPUTS_GIF = $(patsubst ${GIF_DIR}/%.tape,${GIF_DIR}/%.gif,$(INPUTS_TAPE))
+
+all-gif: $(OUTPUTS_GIF)
+
+# TODO find a way to run pre and post rules once  
+${GIF_DIR}/%.gif: ${GIF_DIR}/%.tape
+	@printf "Build app\n"
+	@$(eval DOCKER_ID=$(shell docker create ${APP_NAME}))
+	@docker cp ${DOCKER_ID}:/${APP_NAME} ${GIF_DIR} && docker rm ${DOCKER_ID}
+	@printf "Run gif creation for $@ from tape $< \n"
+	@docker run --rm \
+		-u `id -u`:`id -u` \
+		-v `pwd`/test/mytarfolder.tar:${TARBALL} \
+		-v `pwd`/${GIF_DIR}:/vhs \
+		-e TARBALL=${TARBALL} -e OUTDIR=${OUTDIR} \
+		ghcr.io/charmbracelet/vhs $(^F)
+	@printf "Clean files\n"
+	@if [ -d "${GIF_DIR}/extracted" ]; then \
+        rm -r ${GIF_DIR}/extracted; \
+    fi
+	@rm ./${GIF_DIR}/${APP_NAME}
+	@printf "Find gif here: $@\n"
+
+clean-gif:
+	rm ${GIF_DIR}/*.gif

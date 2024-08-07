@@ -83,14 +83,14 @@ func List(r io.Reader) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	lst := []string{root.GetPath()}
+	res := []string{root.GetPath()}
 
 	root.ForAllChildren(func(nd *Node[struct{}]) error {
-		lst = append(lst, nd.header.Name)
+		res = append(res, nd.header.Name)
 		return nil
 	})
 
-	return lst, nil
+	return res, nil
 }
 
 // Extract all nodes to the output file.

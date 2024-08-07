@@ -34,7 +34,7 @@ func (n *Node[T]) GetRoot() *Node[T] {
 	} else {
 		return n.parent.GetRoot()
 	}
-} // Node is root
+}
 
 // GetParent return the parent node, or itself if it's root
 func (n *Node[T]) GetParent() *Node[T] {
@@ -51,11 +51,11 @@ func (n *Node[T]) ForAllChildren(cb func(*Node[T]) error) error {
 			return err
 		}
 		if err := node.ForAllChildren(cb); err != nil {
-			return fmt.Errorf("Error on loop into children for %s: %s", n.GetPath(), err)
+			return fmt.Errorf("error on loop into children for %s: %s", n.GetPath(), err)
 		}
 	}
 	return nil
-} // Node is root
+}
 
 // addChild set this node as parent to the added node and append it to children
 func (n *Node[T]) addChild(node *Node[T]) {

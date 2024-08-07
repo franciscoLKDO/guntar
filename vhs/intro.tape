@@ -5,16 +5,18 @@ Set Width 1300
 Set Height 600
 
 # Welcome to Guntar
-Type "echo 'Welcome to Guntar!'"
+Type "Welcome to Guntar!"
 Sleep 2s
 Hide
-Enter 1
+Ctrl+c
+Ctrl+l
+Show
 
 
 # Run the intro
 Type ./guntar intro
 Enter 1
-Show
+
 
 # Admire the intro for a bit.
 Sleep 5s

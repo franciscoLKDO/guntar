@@ -2,7 +2,7 @@
 
 ![Alt Text](./vhs/intro.gif)
 
-Guntar is a CLI tool for tar archive. It allows you to read tar archives and browse, read, and extract files directly in memory.
+Guntar is a CLI tool for tar archive. It allows you to read, browse, and extract files directly in memory.
 
 ## Features
 
@@ -71,6 +71,9 @@ _Known Issues:_
 
 
 #### `extract`
+
+![Alt Text](./vhs/extract.gif)
+
 Extract files from a tar archive.
 
 Usage:

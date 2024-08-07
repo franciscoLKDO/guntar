@@ -5,7 +5,7 @@ Set Width 1500
 Set Height 700
 
 # Run the command by pressing enter.
-Type " ./guntar explore $TARFILE -o $OUTDIR"
+Type " ./guntar explore $TARBALL -o $OUTDIR"
 Enter 1
 Sleep 1s
 
