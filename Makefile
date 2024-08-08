@@ -7,7 +7,6 @@ TEST_REPEAT_COUNT?=3
 APP_VERSION?=$(shell go run . version)-dev
 APP_NAME:=guntar
 
-
 test-setup:
 	mkdir -p ${TEST_RESULTS_DIR}
 	mkdir -p ${TEST_RESULTS_COVERAGE_REPORT_DIR}
@@ -15,7 +14,7 @@ test-setup:
 test: test-setup
 	@go test -timeout ${TEST_TIMEOUT} -v -count ${TEST_REPEAT_COUNT} ./... -coverpkg=./... -coverprofile=${TEST_RESULTS_COVERAGE_REPORT_COV}
 	@go tool cover -html=${TEST_RESULTS_COVERAGE_REPORT_COV} -o ${TEST_RESULTS_COVERAGE_REPORT_HTML}
-	@printf "Coverage report available here: ${TEST_RESULTS_COVERAGE_REPORT_HTML}\n"
+	@echo "Coverage report available here: ${TEST_RESULTS_COVERAGE_REPORT_HTML}\n"
 
 install-dependencies:
 	go mod tidy
@@ -27,34 +26,46 @@ install-binary: install
 build-image:
 	docker build . -t ${APP_NAME} --build-arg APP_VERSION=${APP_VERSION}
 
-
-# Handle gif targets, 
+# Handle gifs build.
 GIF_DIR:=vhs
 TARBALL:=/mytarfolder.tar
-OUTDIR:=./extracted
-INPUTS_TAPE = $(wildcard ${GIF_DIR}/*.tape)
-OUTPUTS_GIF = $(patsubst ${GIF_DIR}/%.tape,${GIF_DIR}/%.gif,$(INPUTS_TAPE))
+OUTDIR:=extracted
 
-all-gif: $(OUTPUTS_GIF)
+OUTPUTS_GIF = $(patsubst ${GIF_DIR}/%.tape,${GIF_DIR}/%.gif,$(wildcard ${GIF_DIR}/*.tape))
 
-# TODO find a way to run pre and post rules once  
+# This is building gifs inside vhs container, do not use it directly, you must use build-% target instead
+# env variables are handled here and can be used in tapes.
+# Guntar docker image must be present on host.
 ${GIF_DIR}/%.gif: ${GIF_DIR}/%.tape
-	@printf "Build app\n"
-	@$(eval DOCKER_ID=$(shell docker create ${APP_NAME}))
-	@docker cp ${DOCKER_ID}:/${APP_NAME} ${GIF_DIR} && docker rm ${DOCKER_ID}
-	@printf "Run gif creation for $@ from tape $< \n"
+	@echo "Run gif creation for $@ from tape $(^F) \n"
 	@docker run --rm \
 		-u `id -u`:`id -u` \
 		-v `pwd`/test/mytarfolder.tar:${TARBALL} \
 		-v `pwd`/${GIF_DIR}:/vhs \
 		-e TARBALL=${TARBALL} -e OUTDIR=${OUTDIR} \
 		ghcr.io/charmbracelet/vhs $(^F)
-	@printf "Clean files\n"
-	@if [ -d "${GIF_DIR}/extracted" ]; then \
-        rm -r ${GIF_DIR}/extracted; \
-    fi
-	@rm ./${GIF_DIR}/${APP_NAME}
-	@printf "Find gif here: $@\n"
+	@echo "New gif here: $@\n"
 
-clean-gif:
+pre-build-gif:
+	@echo "Build app\n"
+	@$(eval DOCKER_ID=$(shell docker create ${APP_NAME}))
+	@docker cp ${DOCKER_ID}:/${APP_NAME} ${GIF_DIR} && docker rm ${DOCKER_ID}
+
+post-build-gif:
+	@echo "Clean files\n"
+	@rm -rf ${GIF_DIR}/${OUTDIR}_*;
+	@rm -f ./${GIF_DIR}/${APP_NAME}
+
+# Build all updated gifs
+build-gifs: pre-build-gif $(OUTPUTS_GIF) 
+	@$(MAKE) post-build-gif
+
+# Build specific gif if updated
+build-%: pre-build-gif ${GIF_DIR}/%.gif
+	@$(MAKE) post-build-gif
+
+# Remove all existing gifs
+remove-gif:
 	rm ${GIF_DIR}/*.gif
+
+.PHONY: pre-build-gif post-build-gif build-all build-% remove-gif

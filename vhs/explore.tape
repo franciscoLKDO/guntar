@@ -5,7 +5,7 @@ Set Width 1500
 Set Height 700
 
 # Run the command by pressing enter.
-Type " ./guntar explore $TARBALL -o $OUTDIR"
+Type " ./guntar explore $TARBALL -o ${OUTDIR}_explore"
 Enter 1
 Sleep 1s
 
@@ -52,7 +52,7 @@ Type "echo listing all selected files!"
 Enter 1
 Sleep 1s
 
-Type "ls -alR $OUTDIR"
+Type "ls -alR ${OUTDIR}_explore"
 Sleep 1s
 Enter  1
 Sleep 5s
