@@ -28,7 +28,7 @@ build-image:
 
 # Handle gifs build.
 GIF_DIR:=vhs
-TARBALL:=/mytarfolder.tar
+TARBALL:=/archive_gif.tar
 OUTDIR:=extracted
 
 OUTPUTS_GIF = $(patsubst ${GIF_DIR}/%.tape,${GIF_DIR}/%.gif,$(wildcard ${GIF_DIR}/*.tape))
@@ -61,11 +61,11 @@ build-gifs: pre-build-gif $(OUTPUTS_GIF)
 	@$(MAKE) post-build-gif
 
 # Build specific gif if updated
-build-%: pre-build-gif ${GIF_DIR}/%.gif
+build-gif-%: pre-build-gif ${GIF_DIR}/%.gif
 	@$(MAKE) post-build-gif
 
 # Remove all existing gifs
-remove-gif:
+remove-gifs:
 	rm ${GIF_DIR}/*.gif
 
 .PHONY: pre-build-gif post-build-gif build-all build-% remove-gif

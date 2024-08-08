@@ -28,6 +28,19 @@ make install-binary
 make build
 ```
 
+### Build gifs
+After building guntar docker image,
+We can build gifs with the following commands
+
+```bash
+# Build all gifs
+make build-gifs
+# Build one gif (here list.gif)
+make build-gif-list
+```
+
+it will only build updated tapes.
+
 ## Usage
 
 ### Basic Command Structure
