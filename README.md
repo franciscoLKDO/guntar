@@ -73,11 +73,11 @@ guntar explore archive.tar -o output_directory
 ```
 
 - Navigate through directories and files with arrows
-- Select files or directory to extract with ctrl+a
+- Select files or directory to extract with 'a'
     - no checkmark -> file or directory not selected
     - $\color{Green}{\textsf{✓}}$ -> file selected / all child in directory selected
     - $\color{Orange}{\textsf{✓}}$ -> some files are selected in the directory
-- Extract files with ctrl+s
+- Extract files with 'e'
 
 _Known Issues:_
 - big files can break the textbox view -> will set a max size preview
