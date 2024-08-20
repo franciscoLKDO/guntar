@@ -183,9 +183,9 @@ func TestListerSelection(t *testing.T) {
 		assert.Nil(t, cmd)
 		testNode := l.currentNode.GetChildren()[l.selected]
 		// test directory should be found
-		assert.DirExists(t, filepath.Join(tmpDir, testNode.GetPath()))
+		assert.DirExists(t, filepath.Join(tmpDir, tar.ExtractFolder, testNode.GetPath()))
 		// test/readme.txt file should be found
-		assert.FileExists(t, filepath.Join(tmpDir, testNode.GetChildren()[1].GetPath()))
+		assert.FileExists(t, filepath.Join(tmpDir, tar.ExtractFolder, testNode.GetChildren()[1].GetPath()))
 	})
 
 	t.Run("View lister", func(t *testing.T) {

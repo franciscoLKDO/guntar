@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-const DefaultExtractFolder = "./extract"
+const ExtractFolder = "guntar_extracted"
 
 func scan[T any](r io.Reader, OnNodeCreation func(*Node[T]) error, readData bool) (*Node[T], error) {
 	tr := tar.NewReader(r)
@@ -57,7 +57,7 @@ func List(r io.Reader) ([]string, error) {
 	}
 
 	list := []string{}
-	root.ForAllChildren(func(nd *Node[struct{}]) error {
+	root.OnNestedChildren(func(nd *Node[struct{}]) error {
 		list = append(list, nd.GetPath())
 		return nil
 	})
@@ -67,16 +67,24 @@ func List(r io.Reader) ([]string, error) {
 
 // Extract all nodes to the output file.
 // isSkipped callback can be used to add logic (skip current node if true) on nodes extraction
-func Extract[T any](node *Node[T], output string, isSkipped func(*Node[T]) bool) error {
-	if len(output) == 0 {
-		output = DefaultExtractFolder
+func Extract[T any](node *Node[T], outputPath string, isSkipped func(*Node[T]) bool) error {
+	if len(outputPath) == 0 {
+		var err error
+		outputPath, err = os.Getwd()
+		if err != nil {
+			return fmt.Errorf("error on get current directory: %s", err)
+		}
 	}
-	return node.ForAllChildren(func(nd *Node[T]) error {
+	outputPath = filepath.Join(outputPath, ExtractFolder)
+	if err := os.Mkdir(outputPath, 0777); os.IsExist(err) {
+		return fmt.Errorf("error on create extract directory %s: %s", outputPath, err)
+	}
+	return node.OnNestedChildren(func(nd *Node[T]) error {
 		if isSkipped(nd) {
 			return nil
 		}
 
-		dirPath := filepath.Join(output, nd.GetParent().GetPath())
+		dirPath := filepath.Join(outputPath, nd.GetParent().GetPath())
 		if !nd.IsDir() && nd.Mode().IsRegular() {
 			if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 				err := os.MkdirAll(dirPath, 0777) //TODO change me to use permissions from archive?

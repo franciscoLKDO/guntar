@@ -55,13 +55,13 @@ func (n Node[T]) GetDirChildren() []*Node[T] {
 	return res
 }
 
-// ForAllChildren run cb in all nested children
-func (n *Node[T]) ForAllChildren(cb func(*Node[T]) error) error {
+// OnNestedChildren run cb on all nested children
+func (n *Node[T]) OnNestedChildren(cb func(*Node[T]) error) error {
 	for _, node := range n.GetChildren() {
 		if err := cb(node); err != nil {
 			return err
 		}
-		if err := node.ForAllChildren(cb); err != nil {
+		if err := node.OnNestedChildren(cb); err != nil {
 			return fmt.Errorf("error on loop into children for %s: %s", n.GetPath(), err)
 		}
 	}
@@ -74,8 +74,9 @@ func (n *Node[T]) addChild(node *Node[T]) {
 	n.children = append(n.children, node)
 }
 
+// addChildFromHeader add Child to node based on header name
 func (n *Node[T]) addChildFromHeader(header *tar.Header) (*Node[T], error) {
-	path := filepath.Join(n.GetPath(), header.Name)
+	path := filepath.Join(n.GetPath(), header.Name) // Sanitize path
 	nd := newNode[T](header, path)
 
 	queue := []*Node[T]{n}
@@ -89,12 +90,13 @@ func (n *Node[T]) addChildFromHeader(header *tar.Header) (*Node[T], error) {
 			current.addChild(nd)
 			return nd, nil
 		}
-		queue = append(queue, current.GetDirChildren()...)
+		queue = append(queue, current.GetDirChildren()...) // List only directory childs
 	}
 	n.addChild(nd)
 	return nd, nil
 }
 
+// newNode return a node with default values
 func newNode[T any](header *tar.Header, path string) *Node[T] {
 	return &Node[T]{
 		header:   header,

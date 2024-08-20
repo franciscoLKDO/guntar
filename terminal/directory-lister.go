@@ -156,7 +156,7 @@ func (m ListerModel) back() (ListerModel, tea.Cmd) {
 // setSelectionNode run top to bot to select or not all children from current node
 func setSelectionNode(node *listerNode, sel SelectedState) {
 	node.Spec.selectionStatus = sel
-	node.ForAllChildren(func(n *listerNode) error {
+	node.OnNestedChildren(func(n *listerNode) error {
 		n.Spec.selectionStatus = sel
 		return nil
 	})

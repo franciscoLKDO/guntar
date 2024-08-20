@@ -11,6 +11,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func getExtractedPath(dir string, file string) string {
+	return filepath.Join(dir, ExtractFolder, file)
+}
+
 func TestOperationsOnArchive(t *testing.T) {
 	files := []test.File{
 		{Name: "./test/", Mode: fs.ModeDir, Body: ""},
@@ -31,7 +35,7 @@ func TestOperationsOnArchive(t *testing.T) {
 		expectedChildren int
 	}{
 		{
-			name:  "archive with files and directories",
+			name:  "Archive with files and directories",
 			files: files,
 			spec: addStruct{
 				first:  1,
@@ -40,7 +44,7 @@ func TestOperationsOnArchive(t *testing.T) {
 			expectedChildren: 3,
 		},
 		{
-			name: "archive with files only",
+			name: "Archive with files only",
 			files: []test.File{
 				{Name: "gopher.txt", Mode: 0600, Body: "Gopher names:\nGeorge\nGeoffrey\nGonzo"},
 				{Name: "todo.txt", Mode: 0600, Body: "Get animal handling license."},
@@ -82,14 +86,18 @@ func TestOperationsOnArchive(t *testing.T) {
 		require.Nil(t, err)
 
 		// Check all files and directory has been created in tmpDir
-		root.ForAllChildren(func(n *SimpleNode) error {
+		root.OnNestedChildren(func(n *SimpleNode) error {
 			if n.IsDir() {
-				assert.DirExists(t, filepath.Join(tmpDir, n.GetPath()))
+				assert.DirExists(t, getExtractedPath(tmpDir, n.GetPath()))
 			} else {
-				assert.FileExists(t, filepath.Join(tmpDir, n.GetPath()))
+				assert.FileExists(t, getExtractedPath(tmpDir, n.GetPath()))
 			}
 			return nil
 		})
+
+		// Should raise an error on extract on already existing extracted folder
+		err = Extract(root, tmpDir, func(n *SimpleNode) bool { return false })
+		assert.ErrorContains(t, err, "error on create extract directory")
 	})
 }
 
@@ -104,7 +112,7 @@ func TestScanWithArchiveFile(t *testing.T) {
 		spec    any
 	}{
 		{
-			name:    "simple node with struct",
+			name:    "Simple node with struct",
 			wantErr: false,
 			spec: addStruct{
 				first:  1,
@@ -112,12 +120,12 @@ func TestScanWithArchiveFile(t *testing.T) {
 			},
 		},
 		{
-			name:    "simple node with string",
+			name:    "Simple node with string",
 			wantErr: false,
 			spec:    "hello there",
 		},
 		{
-			name:    "simple node with int",
+			name:    "Simple node with int",
 			wantErr: false,
 			spec:    1,
 		},
@@ -167,6 +175,6 @@ func TestPathTraversal(t *testing.T) {
 		err = Extract(root, tmpDir, func(n *SimpleNode) bool { return false })
 		require.Nil(t, err)
 		// Assert fileName is in tmpdir
-		assert.FileExists(t, filepath.Join(tmpDir, expectedPath))
+		assert.FileExists(t, getExtractedPath(tmpDir, expectedPath))
 	})
 }

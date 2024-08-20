@@ -22,7 +22,7 @@ type TerminalModel struct {
 func New(tarFile io.Reader, exportPath string) (TerminalModel, error) {
 	tb, _ := NewTextBox()
 	if len(exportPath) == 0 {
-		exportPath = tar.DefaultExtractFolder
+		exportPath = tar.ExtractFolder
 	}
 	root, err := tar.Scan(tarFile, OnNewNode)
 	if err != nil {
