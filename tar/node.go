@@ -44,13 +44,24 @@ func (n *Node[T]) GetParent() *Node[T] {
 	return n.parent
 }
 
-// ForAllChildren run cb in all nested children
-func (n *Node[T]) ForAllChildren(cb func(*Node[T]) error) error {
+// GetDirChildren return the node's directory children
+func (n Node[T]) GetDirChildren() []*Node[T] {
+	var res []*Node[T]
+	for _, node := range n.GetChildren() {
+		if node.IsDir() {
+			res = append(res, node)
+		}
+	}
+	return res
+}
+
+// OnNestedChildren run cb on all nested children
+func (n *Node[T]) OnNestedChildren(cb func(*Node[T]) error) error {
 	for _, node := range n.GetChildren() {
 		if err := cb(node); err != nil {
 			return err
 		}
-		if err := node.ForAllChildren(cb); err != nil {
+		if err := node.OnNestedChildren(cb); err != nil {
 			return fmt.Errorf("error on loop into children for %s: %s", n.GetPath(), err)
 		}
 	}
@@ -63,15 +74,34 @@ func (n *Node[T]) addChild(node *Node[T]) {
 	n.children = append(n.children, node)
 }
 
-func (n *Node[T]) isEqual(node *Node[T]) bool {
-	return n.Name() == node.Name() && n.GetPath() == node.GetPath()
+// addChildFromHeader add Child to node based on header name
+func (n *Node[T]) addChildFromHeader(header *tar.Header) (*Node[T], error) {
+	path := filepath.Join(n.GetPath(), header.Name) // Sanitize path
+	nd := newNode[T](header, path)
+
+	queue := []*Node[T]{n}
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+		if current.GetPath() == path { // Return an error if path already exist
+			return nil, NodeExistError{path: path}
+		}
+		if current.GetPath() == filepath.Dir(path) { // link node to parent
+			current.addChild(nd)
+			return nd, nil
+		}
+		queue = append(queue, current.GetDirChildren()...) // List only directory childs
+	}
+	n.addChild(nd)
+	return nd, nil
 }
 
-func newNode[T any](header *tar.Header) *Node[T] {
+// newNode return a node with default values
+func newNode[T any](header *tar.Header, path string) *Node[T] {
 	return &Node[T]{
 		header:   header,
 		FileInfo: header.FileInfo(),
-		path:     filepath.Clean(header.Name),
+		path:     path,
 		data:     make([]byte, header.Size),
 	}
 }
@@ -90,7 +120,15 @@ func (d *rootFI) Sys() interface{}   { return nil }
 
 func newRootNode[T any]() *Node[T] {
 	return &Node[T]{
-		FileInfo: &rootFI{modTime: time.Now(), name: "./"},
-		path:     ".",
+		FileInfo: &rootFI{modTime: time.Now(), name: "/"},
+		path:     "/",
 	}
+}
+
+type NodeExistError struct {
+	path string
+}
+
+func (n NodeExistError) Error() string {
+	return fmt.Sprintf("Path already exist in the tree: %s", n.path)
 }

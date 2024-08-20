@@ -48,9 +48,10 @@ Sleep 3s
 
 Ctrl+c
 Ctrl+l
-Type "echo listing all selected files!"
-Enter 1
+Type "listing all selected files!"
 Sleep 1s
+Ctrl+c
+Ctrl+l
 
 Type "ls -alR ${OUTDIR}_explore"
 Sleep 1s
