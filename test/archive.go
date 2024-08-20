@@ -15,7 +15,7 @@ type File struct {
 	Body string
 }
 
-// CreateArchive for tests, this funcion will return a tar archive buffer based on given files
+// CreateArchive for tests, this function will return a tar archive buffer based on given files
 func CreateArchive(t *testing.T, files []File) *bytes.Buffer {
 	// Create and add some files to the archive.
 	var buf bytes.Buffer

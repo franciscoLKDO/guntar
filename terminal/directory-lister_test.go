@@ -48,7 +48,7 @@ func TestNewLister(t *testing.T) {
 		assert.Nil(t, cmd)
 		assert.True(t, l.currentNode.IsDir())   // Current Node is ./test
 		assert.False(t, l.currentNode.IsRoot()) // Current Node is not root
-		assert.Equal(t, "test", l.currentNode.GetPath())
+		assert.Equal(t, "/test", l.currentNode.GetPath())
 	})
 
 	t.Run("Ask enterFileView on key enter (file selected)", func(t *testing.T) {
@@ -159,7 +159,7 @@ func TestListerSelection(t *testing.T) {
 		l, cmd = l.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'a'}}) // Type select button (deselect on selected node)
 		assert.Nil(t, cmd)
 		nd := l.currentNode.GetChildren()[l.selected]
-		assert.Equal(t, "test/nested", nd.GetPath())
+		assert.Equal(t, "/test/nested", nd.GetPath())
 		assert.Equal(t, NotSelected, nd.Spec.selectionStatus) // Nested directory is deselected
 		for _, n := range nd.GetChildren() {
 			assert.Equal(t, NotSelected, n.Spec.selectionStatus)

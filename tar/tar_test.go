@@ -11,7 +11,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestScanWithBuffer(t *testing.T) {
+func TestOperationsOnArchive(t *testing.T) {
+	files := []test.File{
+		{Name: "./test/", Mode: fs.ModeDir, Body: ""},
+		{Name: "./test/readme.txt", Mode: 0600, Body: "This archive contains some text files."},
+		{Name: "./test/hello.txt", Mode: 0600, Body: "world"},
+		{Name: "gopher.txt", Mode: 0600, Body: "Gopher names:\nGeorge\nGeoffrey\nGonzo"},
+		{Name: "todo.txt", Mode: 0600, Body: "Get animal handling license."},
+	}
 	type addStruct struct {
 		first  int
 		second string
@@ -24,14 +31,8 @@ func TestScanWithBuffer(t *testing.T) {
 		expectedChildren int
 	}{
 		{
-			name: "archive with files and directories",
-			files: []test.File{
-				{Name: "./test", Mode: fs.ModeDir, Body: ""},
-				{Name: "./test/readme.txt", Mode: 0600, Body: "This archive contains some text files."},
-				{Name: "./test/hello.txt", Mode: 0600, Body: "world"},
-				{Name: "gopher.txt", Mode: 0600, Body: "Gopher names:\nGeorge\nGeoffrey\nGonzo"},
-				{Name: "todo.txt", Mode: 0600, Body: "Get animal handling license."},
-			},
+			name:  "archive with files and directories",
+			files: files,
 			spec: addStruct{
 				first:  1,
 				second: "two",
@@ -61,6 +62,35 @@ func TestScanWithBuffer(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("List archive", func(t *testing.T) {
+		res, err := List(test.CreateArchive(t, files))
+		require.Nil(t, err)
+		assert.Len(t, res, len(files))
+	})
+	t.Run("Extract archive", func(t *testing.T) {
+		root, err := Scan(test.CreateArchive(t, files), func(n *SimpleNode) error {
+			return nil
+		})
+		require.Nil(t, err)
+		// Create tmpDir to extract archive
+		tmpDir, err := os.MkdirTemp("", "*")
+		require.Nil(t, err)
+		defer os.RemoveAll(tmpDir)
+
+		err = Extract(root, tmpDir, func(n *SimpleNode) bool { return false })
+		require.Nil(t, err)
+
+		// Check all files and directory has been created in tmpDir
+		root.ForAllChildren(func(n *SimpleNode) error {
+			if n.IsDir() {
+				assert.DirExists(t, filepath.Join(tmpDir, n.GetPath()))
+			} else {
+				assert.FileExists(t, filepath.Join(tmpDir, n.GetPath()))
+			}
+			return nil
+		})
+	})
 }
 
 func TestScanWithArchiveFile(t *testing.T) {
@@ -110,4 +140,33 @@ func TestScanWithArchiveFile(t *testing.T) {
 			require.Nil(t, file.Close())
 		})
 	}
+}
+
+func TestPathTraversal(t *testing.T) {
+	fileName := "exploit_test.txt"
+	files := []test.File{
+		{Name: "./test/", Mode: fs.ModeDir, Body: ""},
+		{Name: "./test/..", Mode: fs.ModeDir, Body: ""},
+		{Name: "./test/../..", Mode: fs.ModeDir, Body: ""},
+		{Name: "./test/../../..", Mode: fs.ModeDir, Body: ""},
+		{Name: "./test/../../../" + fileName, Mode: 0600, Body: "tryin to get out!!!"},
+	}
+	var root *SimpleNode
+	t.Run("Avoid path traversal", func(t *testing.T) {
+		expectedPath := "/" + fileName
+		var err error
+		root, err = Scan(test.CreateArchive(t, files), func(n *SimpleNode) error { return nil })
+		require.Nil(t, err)
+		// exploit_test is on the root directory of the tree
+		assert.Equal(t, expectedPath, root.children[root.LenChildren()-1].GetPath())
+
+		// Create tmpDir to extract archive
+		tmpDir, err := os.MkdirTemp("", "*")
+		require.Nil(t, err)
+		defer os.RemoveAll(tmpDir)
+		err = Extract(root, tmpDir, func(n *SimpleNode) bool { return false })
+		require.Nil(t, err)
+		// Assert fileName is in tmpdir
+		assert.FileExists(t, filepath.Join(tmpDir, expectedPath))
+	})
 }
