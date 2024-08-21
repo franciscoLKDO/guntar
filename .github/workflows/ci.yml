@@ -19,7 +19,7 @@ jobs:
         GIT_COMMIT=$(echo ${{ github.sha }} | cut -c 1-6)
         echo "GIT_COMMIT=${GIT_COMMIT}" >> $GITHUB_ENV
         echo "DOCKER_TAG=$(echo ci-${GIT_COMMIT})" >> $GITHUB_ENV
-        echo "BRANCH_NAME=${{ github.event.pull_request && github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+        echo "BRANCH_NAME=${${{ github.event.pull_request && github.head_ref || github.ref_name }}/\//_}" >> $GITHUB_ENV
 
     - name: Build docker image
       run: DOCKER_TAG=${{ env.DOCKER_TAG }} DOCKER_TARGET=test make build-image
