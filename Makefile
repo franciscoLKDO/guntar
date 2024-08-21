@@ -32,7 +32,7 @@ install-binary: install
 	go install
 
 build-image:
-	docker build . -t ${APP_NAME}:${DOCKER_TAG} --build-arg APP_VERSION=${APP_VERSION} COMMIT_ID=${COMMIT_ID} --target ${DOCKER_TARGET}
+	docker build . -t ${APP_NAME}:${DOCKER_TAG} --build-arg APP_VERSION=${APP_VERSION} --build-arg COMMIT_ID=${COMMIT_ID} --target ${DOCKER_TARGET}
 
 test-ci:
 	docker run -t -v ${TEST_RESULTS_DIR}:${DOCKER_RESULTS_DIR} ${APP_NAME}:${DOCKER_TAG} make test
