@@ -1,6 +1,6 @@
 # Guntar
 [![docker-CI](https://github.com/franciscoLKDO/guntar/actions/workflows/docker-ci.yml/badge.svg?branch=master&event=push)](https://github.com/franciscoLKDO/guntar/actions/workflows/docker-ci.yml)
-
+[![codecov](https://codecov.io/github/franciscoLKDO/guntar/graph/badge.svg?token=7K2T7UDXZO)](https://codecov.io/github/franciscoLKDO/guntar)
 
 ![Alt Text](./vhs/intro.gif)
 
