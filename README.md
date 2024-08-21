@@ -1,4 +1,6 @@
 # Guntar
+[![docker-CI](https://github.com/franciscoLKDO/guntar/actions/workflows/docker-ci.yml/badge.svg?branch=master&event=push)](https://github.com/franciscoLKDO/guntar/actions/workflows/docker-ci.yml)
+
 
 ![Alt Text](./vhs/intro.gif)
 
