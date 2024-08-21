@@ -15,12 +15,9 @@ jobs:
     - name: Set variables
       shell: bash
       run:  |
-        echo ${{ github.sha }} | cut -c 1-6
-        echo "GIT_COMMIT=$(echo ${{ github.sha }} | cut -c 1-6)" >> $GITHUB_ENV
-        echo ${GIT_COMMIT}
-        echo $GIT_COMMIT
-        echo ${{ env.GIT_COMMIT }}
-        echo "DOCKER_TAG=$(echo ci-${{ env.GIT_COMMIT }})" >> $GITHUB_ENV
+        GIT_COMMIT=$(echo ${{ github.sha }} | cut -c 1-6)
+        echo "GIT_COMMIT=${GIT_COMMIT}" >> $GITHUB_ENV
+        echo "DOCKER_TAG=$(echo ci-${GIT_COMMIT})" >> $GITHUB_ENV
 
     - name: Build docker image for tests
       run: DOCKER_TAG=${{ env.DOCKER_TAG }} DOCKER_TARGET=test make build-image
