@@ -33,11 +33,10 @@ jobs:
         docker cp ${CONTAINER}:/app/test/results `pwd`/test/results
         docker rm ${CONTAINER}
 
+    - name: Upload results to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+
     - name: Lint application in container
       run: docker run --rm guntar:${{ env.DOCKER_TAG }} make lint
-
-    - name: Archive code coverage results
-      uses: actions/upload-artifact@v4
-      with:
-        name: docker-code-coverage-report-${{ env.BRANCH_NAME }} 
-        path: test/results/coverage/coverage.html
