@@ -23,15 +23,18 @@ jobs:
         BRANCH=${{ github.event.pull_request && github.head_ref || github.ref_name }}
         echo "BRANCH_NAME=${BRANCH////"_"}" >> $GITHUB_ENV
 
-    - name: Build docker image
+    - name: Build docker image on test stage
       run: DOCKER_TAG=${{ env.DOCKER_TAG }} DOCKER_TARGET=test make build-image
-
+    
     - name: Test application in container
       run: |
         CONTAINER=guntar-test
         docker run --name ${CONTAINER} guntar:${{ env.DOCKER_TAG }} make test
         docker cp ${CONTAINER}:/app/test/results `pwd`/test/results
         docker rm ${CONTAINER}
+
+    - name: Lint application in container
+      run: docker run --rm --name ${CONTAINER} guntar:${{ env.DOCKER_TAG }} make lint
 
     - name: Archive code coverage results
       uses: actions/upload-artifact@v4

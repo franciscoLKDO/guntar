@@ -86,7 +86,7 @@ func TestOperationsOnArchive(t *testing.T) {
 		require.Nil(t, err)
 
 		// Check all files and directory has been created in tmpDir
-		root.OnNestedChildren(func(n *SimpleNode) error {
+		err = root.OnNestedChildren(func(n *SimpleNode) error {
 			if n.IsDir() {
 				assert.DirExists(t, getExtractedPath(tmpDir, n.GetPath()))
 			} else {
@@ -94,7 +94,7 @@ func TestOperationsOnArchive(t *testing.T) {
 			}
 			return nil
 		})
-
+		require.Nil(t, err)
 		// Should raise an error on extract on already existing extracted folder
 		err = Extract(root, tmpDir, func(n *SimpleNode) bool { return false })
 		assert.ErrorContains(t, err, "error on create extract directory")

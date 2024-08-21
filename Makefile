@@ -23,9 +23,15 @@ test: test-setup
 	@go tool cover -html=${TEST_RESULTS_COVERAGE_REPORT_COV} -o ${TEST_RESULTS_COVERAGE_REPORT_HTML}
 	@echo "Coverage report available here: ${TEST_RESULTS_COVERAGE_REPORT_HTML}\n"
 
+lint:
+	golangci-lint run --out-format colored-line-number ./...
+
 install-dependencies:
 	go mod tidy
 	go mod download && go mod verify
+
+install-dev: 
+	wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin
 
 install-binary: install
 	go install

@@ -25,6 +25,7 @@ FROM base as test
 # Avoid permissions errors on tests
 RUN chown -R ${USER_UID}:${USER_UID} $WORKDIR
 RUN apk add make
+RUN make install-dev
 
 USER ${USER_UID}
 

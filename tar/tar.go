@@ -57,10 +57,13 @@ func List(r io.Reader) ([]string, error) {
 	}
 
 	list := []string{}
-	root.OnNestedChildren(func(nd *Node[struct{}]) error {
+	err = root.OnNestedChildren(func(nd *Node[struct{}]) error {
 		list = append(list, nd.GetPath())
 		return nil
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return list, nil
 }
