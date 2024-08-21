@@ -19,7 +19,7 @@ jobs:
         echo "DOCKER_TAG=ci-${GIT_COMMIT}" >> $GITHUB_ENV
 
     - name: Build docker image for tests
-      run: DOCKER_TAG=${{ env.DOCKER_TAG }} DOCKER_TARGET=test make build
+      run: DOCKER_TAG=${{ env.DOCKER_TAG }} DOCKER_TARGET=test make build-image
 
     - name: test application
       run: DOCKER_TAG=${{ env.DOCKER_TAG }} make test-ci
