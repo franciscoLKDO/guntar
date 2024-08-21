@@ -15,7 +15,7 @@ jobs:
     - name: Set variables
       shell: bash
       run:  |
-        echo "GIT_COMMIT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+        echo "GIT_COMMIT=$(echo ${{ github.sha }} | cut -c 1-6)" >> $GITHUB_ENV
         echo "DOCKER_TAG=ci-${{ env.GIT_COMMIT }}" >> $GITHUB_ENV
 
     - name: Build docker image for tests
