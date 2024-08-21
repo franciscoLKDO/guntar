@@ -34,7 +34,7 @@ jobs:
         docker rm ${CONTAINER}
 
     - name: Lint application in container
-      run: docker run --rm --name ${CONTAINER} guntar:${{ env.DOCKER_TAG }} make lint
+      run: docker run --rm guntar:${{ env.DOCKER_TAG }} make lint
 
     - name: Archive code coverage results
       uses: actions/upload-artifact@v4
