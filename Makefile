@@ -14,7 +14,6 @@ DOCKER_TAG?=${APP_VERSION}-${DOCKER_STAGE}
 DOCKER_RESULTS_DIR=/app/test/results
 COMMIT_ID?=""
 
-
 test-setup:
 	mkdir -p ${TEST_RESULTS_DIR}
 	mkdir -p ${TEST_RESULTS_COVERAGE_REPORT_DIR}
@@ -33,9 +32,6 @@ install-binary: install
 
 build-image:
 	docker build . -t ${APP_NAME}:${DOCKER_TAG} --build-arg APP_VERSION=${APP_VERSION} --build-arg COMMIT_ID=${COMMIT_ID} --target ${DOCKER_TARGET}
-
-test-ci:
-	docker run -t -v ${TEST_RESULTS_DIR}:${DOCKER_RESULTS_DIR} ${APP_NAME}:${DOCKER_TAG} make test
 
 # Handle gifs build.
 GIF_DIR:=vhs

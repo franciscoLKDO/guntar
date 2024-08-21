@@ -1,12 +1,13 @@
-name: CI
+name: docker-CI
 
 on:
   push:
     branches: [ master ]
   pull_request:
+    branches: [ master ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -19,8 +20,18 @@ jobs:
         echo "GIT_COMMIT=${GIT_COMMIT}" >> $GITHUB_ENV
         echo "DOCKER_TAG=$(echo ci-${GIT_COMMIT})" >> $GITHUB_ENV
 
-    - name: Build docker image for tests
+    - name: Build docker image
       run: DOCKER_TAG=${{ env.DOCKER_TAG }} DOCKER_TARGET=test make build-image
 
-    - name: test application
-      run: DOCKER_TAG=${{ env.DOCKER_TAG }} make test-ci
+    - name: Test application in container
+      run: |
+        CONTAINER=guntar-test
+        docker run --name ${CONTAINER} guntar:${{ env.DOCKER_TAG }} make test
+        docker cp ${CONTAINER}:/app/test/results `pwd`/test/results
+        docker rm ${CONTAINER}
+
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-code-coverage-report-${{github.ref_name}} 
+        path: test/results/coverage/coverage.html
