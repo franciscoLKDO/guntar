@@ -1,0 +1,43 @@
+name: docker-CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+  
+    - name: Set variables
+      shell: bash
+      run:  |
+        GIT_COMMIT=$(echo ${{ github.sha }} | cut -c 1-6)
+        echo "GIT_COMMIT=${GIT_COMMIT}" >> $GITHUB_ENV
+        echo "DOCKER_TAG=$(echo ci-${GIT_COMMIT})" >> $GITHUB_ENV
+
+        BRANCH=${{ github.event.pull_request && github.head_ref || github.ref_name }}
+        echo "BRANCH_NAME=${BRANCH////"_"}" >> $GITHUB_ENV
+
+    - name: Build docker image on test stage
+      run: DOCKER_TAG=${{ env.DOCKER_TAG }} DOCKER_TARGET=test make build-image
+    
+    - name: Test application in container
+      run: |
+        CONTAINER=guntar-test
+        docker run --name ${CONTAINER} guntar:${{ env.DOCKER_TAG }} make test
+        docker cp ${CONTAINER}:/app/test/results `pwd`/test/results
+        docker rm ${CONTAINER}
+
+    - name: Lint application in container
+      run: docker run --rm guntar:${{ env.DOCKER_TAG }} make lint
+
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-code-coverage-report-${{ env.BRANCH_NAME }} 
+        path: test/results/coverage/coverage.html

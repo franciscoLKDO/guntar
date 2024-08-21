@@ -42,7 +42,7 @@ func scan[T any](r io.Reader, OnNodeCreation func(*Node[T]) error, readData bool
 	}
 }
 
-// Scan through the io reader and return the root directory node of the archive,
+// Scan through a reader (file,string,etc...) with a tar archive and return the root directory node of the archive,
 // Node is a generic type, you can implement it with the callback Node type eg: func(n *Node[struct{}])
 // The type T is used to add additionnal data into each nodes on creation. It let the possibility to initialize each node.
 func Scan[T any](r io.Reader, OnNodeCreation func(*Node[T]) error) (*Node[T], error) {
@@ -57,10 +57,13 @@ func List(r io.Reader) ([]string, error) {
 	}
 
 	list := []string{}
-	root.OnNestedChildren(func(nd *Node[struct{}]) error {
+	err = root.OnNestedChildren(func(nd *Node[struct{}]) error {
 		list = append(list, nd.GetPath())
 		return nil
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return list, nil
 }

@@ -1,11 +1,18 @@
+APP_NAME:=guntar
 TEST_RESULTS_DIR?=`pwd`/test/results
 TEST_RESULTS_COVERAGE_REPORT_DIR?=${TEST_RESULTS_DIR}/coverage
 TEST_RESULTS_COVERAGE_REPORT_COV?=${TEST_RESULTS_COVERAGE_REPORT_DIR}/coverage.cov
 TEST_RESULTS_COVERAGE_REPORT_HTML?=${TEST_RESULTS_COVERAGE_REPORT_DIR}/coverage.html
 TEST_TIMEOUT?=100s
 TEST_REPEAT_COUNT?=3
-APP_VERSION?=$(shell go run . version)-dev
-APP_NAME:=guntar
+APP_VERSION?=$(shell go run . version)
+
+
+DOCKER_TARGET?=prod
+DOCKER_STAGE?=dev
+DOCKER_TAG?=${APP_VERSION}-${DOCKER_STAGE}
+DOCKER_RESULTS_DIR=/app/test/results
+COMMIT_ID?=""
 
 test-setup:
 	mkdir -p ${TEST_RESULTS_DIR}
@@ -16,15 +23,21 @@ test: test-setup
 	@go tool cover -html=${TEST_RESULTS_COVERAGE_REPORT_COV} -o ${TEST_RESULTS_COVERAGE_REPORT_HTML}
 	@echo "Coverage report available here: ${TEST_RESULTS_COVERAGE_REPORT_HTML}\n"
 
+lint:
+	golangci-lint run --out-format colored-line-number ./...
+
 install-dependencies:
 	go mod tidy
 	go mod download && go mod verify
+
+install-dev: 
+	wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin
 
 install-binary: install
 	go install
 
 build-image:
-	docker build . -t ${APP_NAME} --build-arg APP_VERSION=${APP_VERSION}
+	docker build . -t ${APP_NAME}:${DOCKER_TAG} --build-arg APP_VERSION=${APP_VERSION} --build-arg COMMIT_ID=${COMMIT_ID} --target ${DOCKER_TARGET}
 
 # Handle gifs build.
 GIF_DIR:=vhs
