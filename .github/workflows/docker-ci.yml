@@ -49,18 +49,18 @@ jobs:
       run: docker run --rm ${{env.DOCKER_IMAGE}}:${{ env.DOCKER_TAG_CI }} make lint
 
     - name: Get current app version
-      # if: ${{ github.event_name == 'push' && github.ref == 'master' }}
+      if: ${{ github.event_name == 'push' && github.ref == 'master' }}
       run: echo "APP_VERSION=$(docker run --rm ${{env.DOCKER_IMAGE}}:${{ env.DOCKER_TAG_CI }} make version)" >> $GITHUB_ENV 
 
     - name: Login to DockerHub
-      # if: ${{ github.event_name == 'push' && github.ref == 'master' }}
+      if: ${{ github.event_name == 'push' && github.ref == 'master' }}
       uses: docker/login-action@v1
       with:
         username: ${{ vars.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Post image to DockerHub
-      # if: ${{ github.event_name == 'push' && github.ref == 'master' }}
+      if: ${{ github.event_name == 'push' && github.ref == 'master' }}
       uses: docker/build-push-action@v6
       with:
         push: true
