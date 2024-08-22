@@ -23,6 +23,8 @@ jobs:
         GIT_COMMIT=$(echo ${{ github.sha }} | cut -c 1-6)
         echo "GIT_COMMIT=${GIT_COMMIT}" >> $GITHUB_ENV
 
+        echo "hello there is an event: ${{github.event_name }}"
+
         BRANCH=${{ github.event.pull_request && github.head_ref || github.ref_name }}
         echo "BRANCH_NAME=${BRANCH////"_"}" >> $GITHUB_ENV
 
