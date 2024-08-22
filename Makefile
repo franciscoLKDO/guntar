@@ -11,8 +11,12 @@ APP_VERSION?=$(shell go run . version)
 DOCKER_TARGET?=prod
 DOCKER_STAGE?=dev
 DOCKER_TAG?=${APP_VERSION}-${DOCKER_STAGE}
+DOCKER_IMAGE?=${APP_NAME}
 DOCKER_RESULTS_DIR=/app/test/results
 COMMIT_ID?=""
+
+version:
+	@go run . version
 
 test-setup:
 	mkdir -p ${TEST_RESULTS_DIR}
@@ -37,7 +41,7 @@ install-binary: install
 	go install
 
 build-image:
-	docker build . -t ${APP_NAME}:${DOCKER_TAG} --build-arg APP_VERSION=${APP_VERSION} --build-arg COMMIT_ID=${COMMIT_ID} --target ${DOCKER_TARGET}
+	docker build . -t ${DOCKER_IMAGE}:${DOCKER_TAG} --build-arg APP_VERSION=${APP_VERSION} --build-arg COMMIT_ID=${COMMIT_ID} --target ${DOCKER_TARGET}
 
 # Handle gifs build.
 GIF_DIR:=vhs
@@ -61,7 +65,7 @@ ${GIF_DIR}/%.gif: ${GIF_DIR}/%.tape
 
 pre-build-gif:
 	@echo "Build app\n"
-	@$(eval DOCKER_ID=$(shell docker create ${APP_NAME}))
+	@$(eval DOCKER_ID=$(shell docker create ${DOCKER_IMAGE}))
 	@docker cp ${DOCKER_ID}:/${APP_NAME} ${GIF_DIR} && docker rm ${DOCKER_ID}
 
 post-build-gif:
