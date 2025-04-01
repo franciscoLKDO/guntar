@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var output string
+var output string = "./extracted"
 
 func parseExtractPath() error {
 	if strings.HasPrefix(output, "~/") {
