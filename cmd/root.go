@@ -24,7 +24,10 @@ func parseExtractPath() error {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "guntar",
+	Use: "guntar",
+	CompletionOptions: cobra.CompletionOptions{
+		DisableDefaultCmd: true,
+	},
 	Short: "Guntar your archive like a pro",
 	Long: `Guntar is a cli experience for tar archives:
 
