@@ -42,6 +42,5 @@ You can browse, look into files and extract selected files/folders.
 }
 
 func init() {
-	// exploreCmd.Flags().StringVarP(&output, "output", "o", "", "Output directory to extract archive")
 	rootCmd.AddCommand(exploreCmd)
 }

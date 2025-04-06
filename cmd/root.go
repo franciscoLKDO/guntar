@@ -32,6 +32,11 @@ var rootCmd = &cobra.Command{
 	Long: `Guntar is a cli experience for tar archives:
 
 It can read tar archive and allow you to browse, read and extract files directly in memory.
+⚠️ Limitations:
+  - All parent directories must be explicitly included in the archive.
+    For example, 'a/b/c/file.txt' requires 'a/', 'a/b/', and 'a/b/c/'
+    to be included as separate entries for correct extraction.
+  - GunTar does not handle symbolic links (symlinks). Only regular files and directories are processed.
 `,
 }
 

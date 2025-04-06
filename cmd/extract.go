@@ -41,6 +41,5 @@ var extractCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(extractCmd)
-	// extractCmd.Flags().StringVarP(&output, "output", "o", "", "Output directory to extract archive")
 	extractCmd.Flags().StringArrayVarP(&extractedFiles, "ext", "e", []string{}, "List of files to extract")
 }
